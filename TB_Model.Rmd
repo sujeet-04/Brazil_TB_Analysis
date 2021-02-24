@@ -1,0 +1,220 @@
+---
+title: "TB_Risk in Brazil"
+author: "Sujeet"
+date: "January 10, 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#Load the data set.
+TB_data <- load("D:\\Data Analysis\\Job\\Unihelp\\R & Python\\big order\\TB.RData")
+head(TBdata)
+```
+
+```{r}
+#Check For na values.
+anyNA(TBdata) #False means no NA VAlue Present in the dataset.
+
+#Structure of the dataset.
+str(TBdata) #It Contains only float and integer variables.
+
+#Distribution of each attributes in the dataset.
+summary(TBdata) 
+
+```
+
+```{r}
+TBdata2 <- TBdata[,c(1:11)]
+TBdata2$TBP <- (TBdata2$TB/TBdata2$Population)*1000000 #Build a column for Tb Per million population
+head(TBdata2)
+
+TBdata3 <- TBdata2[,-c(9,10,11)]
+head(TBdata3)
+dim(TBdata3)
+
+#As we have same values for all the independent variable for all three years we will aggreate these.
+library(plyr)
+TBdata4 <- ddply(TBdata3,.(Indigenous),colwise(mean))
+head(TBdata4)
+dim(TBdata4)
+```
+
+#Now we draw some plot and see how our attributes distibuted,and will check is there any outliers present in it.
+
+```{r}
+library(ggplot2)
+
+ggplot(data = TBdata4,mapping = aes(x=Poor_Sanitation)) + geom_histogram() +    
+  ggtitle("Histogram of Sanitation")
+
+ggplot(data = TBdata4,mapping = aes(x= Indigenous)) + geom_histogram() +
+  ggtitle("Histogram of Poor Indigenous rate")
+
+ggplot(data = TBdata4,mapping = aes(x= Illiteracy)) + geom_histogram() +
+  ggtitle("Histogram of Illiteracy rate")
+
+ggplot(data = TBdata4,mapping = aes(x= Urbanisation)) + geom_histogram() +
+  ggtitle("Histogram of Urbanization rate")
+
+ggplot(data = TBdata4,mapping = aes(x= Density)) + geom_histogram() +
+  ggtitle("Histogram of Density")
+
+ggplot(data = TBdata4,mapping = aes(x= TBP)) + geom_histogram() +
+  ggtitle("Histogram of TB per Population")
+
+ggplot(data = TBdata4,mapping = aes(x= Unemployment)) + geom_histogram() +
+  ggtitle("Histogram of Unemployment")
+
+ggplot(data = TBdata4,mapping = aes(x= Timeliness)) + geom_histogram() +
+  ggtitle("Histogram of Timelines")
+
+```
+
+```{r}
+
+ggplot(data = TBdata4,mapping = aes(y = Poor_Sanitation)) + geom_boxplot() +    
+  ggtitle("Boxplot of Poor Sanitation")
+
+ggplot(data = TBdata4,mapping = aes(y = Indigenous)) + geom_boxplot() +
+  ggtitle("Boxplot of Indigenous rate")
+
+ggplot(data = TBdata4,mapping = aes(y = Illiteracy)) + geom_boxplot() +
+  ggtitle("Boxplot of Illiteracy rate")
+
+ggplot(data = TBdata4,mapping = aes(y = Urbanisation)) + geom_boxplot() +
+  ggtitle("Boxplot of Urbanization rate")
+
+ggplot(data = TBdata4,mapping = aes(y = Density)) + geom_boxplot() +
+  ggtitle("Boxplot of Density")
+
+ggplot(data = TBdata4,mapping = aes(y = TBP)) + geom_boxplot() +
+  ggtitle("Boxplot of TB per Population")
+
+ggplot(data = TBdata4,mapping = aes(y = Unemployment)) + geom_boxplot() +
+  ggtitle("Boxplot of Unemployment")
+
+ggplot(data = TBdata4,mapping = aes(y = Timeliness)) + geom_boxplot() +
+  ggtitle("Boxplot of Timelines")
+
+```
+
+Next we draw a scatter plot to see the dependency of each attributes on tb per population.
+```{r}
+
+ggplot(data = TBdata4,mapping = aes(x= Poor_Sanitation,y=TBP))+
+  geom_point(shape = 23 ,color = "blue")+geom_smooth(method = lm,se = FALSE,color = "darkred")
+
+ggplot(data = TBdata4,mapping = aes(x= Indigenous,y=TBP))+
+  geom_point(shape = 23 ,color = "pink")+geom_smooth(method = lm,se = FALSE,color = "darkblue")
+
+ggplot(data = TBdata4,mapping = aes(x= Illiteracy,y=TBP))+
+  geom_point(shape = 23 ,color = "blue")+geom_smooth(method = lm,se = FALSE,color = "black")
+
+ggplot(data = TBdata4,mapping = aes(x= Urbanisation,y=TBP))+
+  geom_point(shape = 23 ,color = "green")+geom_smooth(method = lm,se = FALSE,color = "darkred")
+
+ggplot(data = TBdata4,mapping = aes(x= Density,y=TBP))+
+  geom_point(shape = 23 ,color = "blue")+geom_smooth(method = lm,se = FALSE,color = "darkred")
+
+ggplot(data = TBdata4,mapping = aes(x= Unemployment,y=TBP))+
+  geom_point(shape = 23 ,color = "blue")+geom_smooth(method = lm,se = FALSE,color = "darkred")
+
+ggplot(data = TBdata4,mapping = aes(x= Timeliness,y=TBP))+
+  geom_point(shape = 23 ,color = "blue")+geom_smooth(method = lm,se = FALSE,color = "darkred")
+
+ggplot(data = TBdata4,mapping = aes(x= Poverty,y=TBP))+
+  geom_point(shape = 23 ,color = "blue")+geom_smooth(method = lm,se = FALSE,color = "darkred")
+
+```
+
+
+
+```{r}
+library(ggcorrplot)
+
+# Compute a correlation matrix
+corr <- round(cor(TBdata4), 1)
+head(corr[, 1:9])
+ggcorrplot(corr)
+ggcorrplot(corr, hc.order = TRUE, type = "lower",lab = TRUE)
+
+```
+Here none of our independent variable making any significant correlation with the tb per population which indicates that the rise in tb cases are not affected due to these variables.but we can see that the there are mutual dependency in few attributes.
+plot the tb cases across the 557 region of brazil to see which region is affected the most in all three years.
+
+```{r}
+
+library(fields)
+
+plot.map(TBdata$TB[TBdata$Year ==2014 ],n.levels = 7,main = "TB Counts For 2014")
+
+plot.map(TBdata$TB[TBdata$Year ==2013 ],n.levels = 7,main = "TB Counts For 2013")
+
+plot.map(TBdata$TB[TBdata$Year ==2012 ],n.levels = 7,main = "TB Counts For 2012")
+
+```
+
+
+Now as we have completed our data exploration part next we build a model and try to see is there any dependeny in these cases based on other attributes.
+
+```{r}
+
+library(mgcv)
+
+model1 <- gam(TBP~s(Poor_Sanitation) + s(Indigenous) + s(Illiteracy) + s(Density) + 
+                s(Urbanisation)  + s(Unemployment) + s(Timeliness) + s(Poverty), 
+              data = TBdata4, method = "REML")
+summary(model1)
+
+plot(model1)
+
+model2 <- gam(TBP~s(Poor_Sanitation,Poverty) + s(Indigenous) + s(Density) + 
+                s(log(Urbanisation))  + s(Unemployment,Illiteracy) + s(Timeliness), 
+              data = TBdata4, method = "REML")
+summary(model2)
+
+plot(model2)
+
+model3 <- gam(TBP~s(Poor_Sanitation) + s(Indigenous) + s(Illiteracy) + s(Density) + 
+                s(Urbanisation)  + s(Unemployment) + s(Timeliness) + s(Poverty), 
+              data = TBdata3, method = "REML")
+summary(model3)
+
+plot(model3)
+
+```
+as we can see here in all three model our r2(adjusted) is very less we already saw in the correlation plot that none of the given attributes make any significance relationship with the Tb per population rate so that should be the case but to confirm that we individualy build a seperate model for each attributes.
+```{r}
+mad1 <- gam(TBP~s(Poor_Sanitation),data = TBdata4,method = "REML")
+summary(mad1)
+plot(mad1)
+
+mad2 <- gam(TBP~s(Indigenous),data = TBdata4,method = "REML")
+summary(mad2)
+plot(mad2)
+
+mad3 <- gam(TBP~s(Poverty),data = TBdata4,method = "REML")
+summary(mad3)
+plot(mad3)
+
+mad4 <- gam(TBP~s(Illiteracy),data = TBdata4,method = "REML")
+summary(mad4)
+plot(mad4)
+
+mad5 <- gam(TBP~s(Density),data = TBdata4,method = "REML")
+summary(mad5)
+plot(mad5)
+
+mad6 <- gam(TBP~s(Urbanisation),data = TBdata4,method = "REML")
+summary(mad6)
+plot(mad6)
+
+mad7 <- gam(TBP~s(Unemployment),data = TBdata4,method = "REML")
+summary(mad7)
+plot(mad7)
+
+mad8 <- gam(TBP~s(Timeliness),data = TBdata4,method = "REML")
+summary(mad8)
+plot(mad8)
+```
+Here also the R2(adjusted) is low in all cases,as we know The adjusted R-squared compares the explanatory power of regression models that contain different numbers of predictors.The adjusted R-squared increases only if the new term improves the model more than would be expected by chance.so we can say that none of these dependent attributes present in our dataset make any significane effect on the Tb/population due to which the dependeny value is very low.
